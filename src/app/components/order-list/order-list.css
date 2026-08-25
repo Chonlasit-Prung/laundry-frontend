@@ -1,0 +1,244 @@
+/* Container หลัก */
+.list-page-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 2rem 1rem;
+  font-family: 'Prompt', 'Sarabun', system-ui, sans-serif;
+}
+
+.list-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.list-header {
+  background: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0 0;
+}
+
+.btn-header-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #f1f5f9;
+  color: #334155;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-header-action:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.icon-arrow {
+  width: 18px;
+  height: 18px;
+}
+
+/* Grid Layout */
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Style */
+.order-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Card Top (รูป + ข้อมูลลูกค้า) */
+.card-top {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cloth-img-box {
+  width: 80px;
+  height: 90px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+
+.cloth-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.info-day {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.info-label.margin-top {
+  margin-top: 0.5rem;
+}
+
+.info-name {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0.1rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info-phone {
+  font-size: 0.825rem;
+  color: #475569;
+  margin: 0.2rem 0;
+}
+
+.info-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2563eb;
+  margin: 0;
+}
+
+/* Card Details (รายการผ้า & หมายเหตุ) */
+.card-details {
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.card-details p {
+  margin: 0.25rem 0;
+}
+
+.details-text {
+  color: #64748b;
+  font-size: 1rem;
+  margin-top: 0.5rem !important;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 0.4rem;
+}
+
+/* Action Group (สถานะ & ปุ่มลบ) */
+.actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Badges & Status Button */
+.status-badge {
+  padding: 0.45rem 0.9rem; /* ขยายขนาดใหญ่ขึ้นเล็กน้อย */
+  border-radius: 20px;
+  font-size: 0.825rem;     /* ปรับขนาดตัวอักษรขึ้น */
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-pending {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.status-pending:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+  transform: scale(1.03);
+}
+
+.status-completed {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.status-completed:hover {
+  background-color: #dcfce7;
+  color: #15803d;
+  transform: scale(1.03);
+}
+
+.status-badge:active {
+  transform: scale(0.97);
+}
+
+/* Delete Button */
+.btn-delete {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
