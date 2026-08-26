@@ -201,7 +201,7 @@ verifyPassword() {
 
   // 🔹 ตั้ง timeout 15 วินาที กันปุ่มหมุนค้างบนมือถือ
   this.orderService.verifyPassword(this.inputPassword)
-    .pipe(timeout(15000))
+    .pipe(timeout(3000))
     .subscribe({
       next: (res) => {
         this.zone.run(() => {
