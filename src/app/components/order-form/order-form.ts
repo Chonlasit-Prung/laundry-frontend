@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Order } from '../../models/order';
@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 export class OrderFormComponent {
   private router = inject(Router);
   private orderService = inject(OrderService);
+  private cdR = inject(ChangeDetectorRef);
 
   hasShirt = false;
   hasPant = false;
@@ -59,6 +60,7 @@ export class OrderFormComponent {
         } else if (type === 'slip') {
           this.order.paymentSlipUrl = reader.result as string;
         }
+        this.cdR.detectChanges();
       };
 
       reader.readAsDataURL(file);
@@ -106,7 +108,6 @@ export class OrderFormComponent {
 
     // แปลงวันที่ให้อยู่ในรูปแบบ ISO String
     const isoPickupDate = new Date(this.order.pickupDate).toISOString();
-
     // ดึงค่า String ของรูปภาพส่งไปตรงๆ (ไม่ตัดเป็น String เปล่า)
     const safeClothImageUrl = typeof this.order.clothImageUrl === 'string' ? this.order.clothImageUrl : '';
     const safePaymentSlipUrl = typeof this.order.paymentSlipUrl === 'string' ? this.order.paymentSlipUrl : '';
@@ -123,8 +124,8 @@ export class OrderFormComponent {
     this.orderService.createOrder(payload).subscribe({
       next: (res) => {
         this.isSubmitting = false; // ปลดล็อก
+        Swal.close();
 
-        // 🎉 แสดง Success Alert จาก SweetAlert2
         Swal.fire({
           icon: 'success',
           title: 'บันทึกสำเร็จ!',
@@ -139,6 +140,8 @@ export class OrderFormComponent {
         this.isSubmitting = false; // ปลดล็อก
         console.error('Error creating order:', err);
 
+        Swal.close();
+
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
@@ -146,6 +149,7 @@ export class OrderFormComponent {
           timer: 2000,
           showConfirmButton: false
         });
+        this.cdR.detectChanges();
       }
     });
   }
@@ -211,6 +215,7 @@ export class OrderFormComponent {
           });
           this.inputPassword = '';
         }
+        this.cdR.detectChanges();
       },
       error: (err) => {
         console.error('Error verifying password:', err);
@@ -224,6 +229,7 @@ export class OrderFormComponent {
           timer: 1500 // ปิดเองอัตโนมัติภายใน 1.5 วินาที
         });
         this.inputPassword = '';
+        this.cdR.detectChanges();
       }
     });
   }
