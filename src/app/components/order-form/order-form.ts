@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Order } from '../../models/order';
 import { OrderService } from '../../services/order.service';
+import { timeout } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -182,70 +183,77 @@ Swal.fire({
   openPasswordModal() { this.showPasswordModal = true; }
   closePasswordModal() { this.showPasswordModal = false; this.inputPassword = ''; }
 
-  verifyPassword() {
-    if (this.isVerifying) return;
+verifyPassword() {
+  if (this.isVerifying) return;
 
-    if (!this.inputPassword.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'แจ้งเตือน',
-        text: 'กรุณากรอกรหัสผ่าน',
-        showConfirmButton: false,
-        timer: 2000 // ปิดเองอัตโนมัติภายใน 1.5 วินาที
-      });
-      return;
-    }
+  if (!this.inputPassword.trim()) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'แจ้งเตือน',
+      text: 'กรุณากรอกรหัสผ่าน',
+      showConfirmButton: false,
+      timer: 1500
+    });
+    return;
+  }
 
-    this.isVerifying = true;
+  this.isVerifying = true;
 
-    this.orderService.verifyPassword(this.inputPassword).subscribe({
+  // 🔹 ตั้ง timeout 15 วินาที กันปุ่มหมุนค้างบนมือถือ
+  this.orderService.verifyPassword(this.inputPassword)
+    .pipe(timeout(15000))
+    .subscribe({
       next: (res) => {
         this.zone.run(() => {
-          this.isVerifying = false; // ปลดล็อก
+          this.isVerifying = false; // ปลดล็อกปุ่ม
 
-        if (res.success) {
-          //  Alert กรณีรหัสผ่านถูกต้อง
-          Swal.fire({
-            icon: 'success',
-            title: 'เข้าสู่ระบบสำเร็จ',
-            text: res.message || 'รหัสผ่านถูกต้อง',
-            showConfirmButton: false,
-            timer: 2000 // ปิดเองอัตโนมัติภายใน 1.5 วินาที
-          }).then(() => {
-            this.closePasswordModal();
-            this.router.navigate(['/order-list']);
-          });
-
-        } else {
-          //  Alert กรณีรหัสผ่านไม่ถูกต้อง
-          Swal.fire({
-            icon: 'error',
-            title: 'รหัสผ่านไม่ถูกต้อง',
-            text: res.message || 'กรุณาลองใหม่อีกครั้ง',
-            showConfirmButton: false,
-            timer: 1500 // ปิดเองอัตโนมัติภายใน 1.5 วินาที
-          });
-          this.inputPassword = '';
-        }
-        this.cdR.detectChanges();
+          if (res.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'เข้าสู่ระบบสำเร็จ',
+              text: res.message || 'รหัสผ่านถูกต้อง',
+              showConfirmButton: false,
+              timer: 1500
+            }).then(() => {
+              this.closePasswordModal();
+              this.router.navigate(['/order-list']);
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'รหัสผ่านไม่ถูกต้อง',
+              text: res.message || 'กรุณาลองใหม่อีกครั้ง',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            this.inputPassword = '';
+          }
+          this.cdR.detectChanges();
         });
       },
       error: (err) => {
         this.zone.run(() => {
-        console.error('Error verifying password:', err);
+          this.isVerifying = false; // 🔹 ต้องปลดล็อกปุ่มทุกครั้งที่เกิด Error
+          console.error('Error verifying password:', err);
 
-        // Alert กรณีเกิด Error จาก Backend / เชื่อมต่อไม่ได้
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: err.error?.message || 'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
-          showConfirmButton: false,
-          timer: 1500 // ปิดเองอัตโนมัติภายใน 1.5 วินาที
+          let errorMsg = err.error?.message || 'รหัสผ่านไม่ถูกต้อง หรือเชื่อมต่อเซิร์ฟเวอร์ไม่ได้';
+
+          // ดักเคส Timeout ( Render หลับ )
+          if (err.name === 'TimeoutError') {
+            errorMsg = 'เซิร์ฟเวอร์ตอบสนองช้า (กำลังเริ่มต้นระบบ) กรุณากดตกลงใหม่อีกครั้งครับ';
+          }
+
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: errorMsg,
+            showConfirmButton: true // ปรับให้มีปุ่มกดปิด เพื่อให้ผู้ใช้อ่านข้อความชัดเจน
+          });
+
+          this.inputPassword = '';
+          this.cdR.detectChanges();
         });
-        this.inputPassword = '';
-        this.cdR.detectChanges();
-      });
       }
     });
-  }
+}
 }
