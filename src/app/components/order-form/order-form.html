@@ -1,3 +1,4 @@
+// order-form.html
 <div class="page-container">
   <div class="main-card">
 
@@ -7,7 +8,7 @@
       <button (click)="openPasswordModal()" class="btn-header-action">
         <span class="section-title">รายการทั้งหมด</span>
         <svg class="icon-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </div>
@@ -19,11 +20,7 @@
       <!-- ชื่อคนรับผ้า -->
       <div class="form-group">
         <label class="form-label">ชื่อ (คนรับผ้า)</label>
-        <input
-          type="text"
-          [(ngModel)]="order.customerName"
-          placeholder="กรอกชื่อลูกค้า/ผู้รับผ้า"
-          class="input-field">
+        <input type="text" [(ngModel)]="order.customerName" placeholder="กรอกชื่อลูกค้า/ผู้รับผ้า" class="input-field">
       </div>
 
       <!-- รายการ เสื้อ / กางเกง -->
@@ -35,12 +32,12 @@
             <span>เสื้อ</span>
           </label>
           @if (hasShirt) {
-            <div class="counter-group">
-              <span class="counter-label">จำนวน</span>
-              <button (click)="decreaseQty('shirt')" class="btn-counter">-</button>
-              <span class="counter-value">{{ order.shirtQty }}</span>
-              <button (click)="increaseQty('shirt')" class="btn-counter">+</button>
-            </div>
+          <div class="counter-group">
+            <span class="counter-label">จำนวน</span>
+            <button (click)="decreaseQty('shirt')" class="btn-counter">-</button>
+            <span class="counter-value">{{ order.shirtQty }}</span>
+            <button (click)="increaseQty('shirt')" class="btn-counter">+</button>
+          </div>
           }
         </div>
 
@@ -51,12 +48,12 @@
             <span>กางเกง</span>
           </label>
           @if (hasPant) {
-            <div class="counter-group">
-              <span class="counter-label">จำนวน</span>
-              <button (click)="decreaseQty('pant')" class="btn-counter">-</button>
-              <span class="counter-value">{{ order.pantQty }}</span>
-              <button (click)="increaseQty('pant')" class="btn-counter">+</button>
-            </div>
+          <div class="counter-group">
+            <span class="counter-label">จำนวน</span>
+            <button (click)="decreaseQty('pant')" class="btn-counter">-</button>
+            <span class="counter-value">{{ order.pantQty }}</span>
+            <button (click)="increaseQty('pant')" class="btn-counter">+</button>
+          </div>
           }
         </div>
       </div>
@@ -64,46 +61,31 @@
       <!-- รายละเอียดการปรับแก้ -->
       <div class="form-group">
         <label class="form-label">รายละเอียดการปรับแก้</label>
-        <textarea
-          [(ngModel)]="order.details"
-          rows="3"
-          placeholder="เสื้อและกางเกงทำอะไรบ้าง เช่น ตัดขา 2 นิ้ว, แก้เอว..."
-          class="textarea-field"></textarea>
+        <textarea [(ngModel)]="order.details" rows="3"
+          placeholder="เสื้อและกางเกงทำอะไรบ้าง เช่น ตัดขา 2 นิ้ว, แก้เอว..." class="textarea-field"></textarea>
       </div>
 
       <!-- แนบภาพ + วันนัดรับ -->
       <div class="form-grid-2col">
         <div class="form-group">
           <label class="form-label">แนบภาพ (ผ้าที่นำมาทำ)</label>
-          <input
-            type="file"
-            (change)="onFileSelect($event, 'cloth')"
-            accept="image/*"
-            class="file-input file-emerald">
+          <input type="file" (change)="onFileSelect($event, 'cloth')" accept="image/*" class="file-input file-emerald">
         </div>
 
         <div class="form-group">
           <label class="form-label">วันนัดรับ</label>
-          <input
-            type="date"
-            [(ngModel)]="order.pickupDate"
-            class="input-field">
+          <input type="date" [(ngModel)]="order.pickupDate" class="input-field">
         </div>
       </div>
 
       <!-- แนบสลิปชำระเงิน -->
       <div class="form-group">
         <label class="form-label">หลักฐานการชำระเงิน</label>
-        <input
-          type="file"
-          (change)="onFileSelect($event, 'slip')"
-          accept="image/*"
-          class="file-input file-slate">
+        <input type="file" (change)="onFileSelect($event, 'slip')" accept="image/*" class="file-input file-slate">
       </div>
-
       <!-- ปุ่มส่ง -->
-      <button (click)="submitOrder()" class="btn-submit">
-        ส่งข้อมูลบันทึกผ้า
+      <button (click)="submitOrder()" [disabled]="isSubmitting" class="btn-submit">
+        {{ isSubmitting ? 'กำลังบันทึก...' : 'ส่งข้อมูลบันทึกผ้า' }}
       </button>
     </div>
 
@@ -112,23 +94,19 @@
 
 <!-- Modal ยืนยัน Password -->
 @if (showPasswordModal) {
-  <div class="modal-overlay">
-    <div class="modal-box">
-      <div class="text-center">
-        <h3 class="modal-title">ยืนยันรหัสผ่านช่าง</h3>
-        <p class="modal-subtitle">กรอก Password เพื่อเข้าสู่หน้ารายการทั้งหมด</p>
-      </div>
+<div class="modal-overlay">
+  <div class="modal-box">
+    <div class="text-center">
+      <h3 class="modal-title">ยืนยันรหัสผ่านช่าง</h3>
+      <p class="modal-subtitle">กรอก Password เพื่อเข้าสู่หน้ารายการทั้งหมด</p>
+    </div>
 
-      <input
-        type="password"
-        [(ngModel)]="inputPassword"
-        placeholder="ใส่ Password"
-        class="modal-input">
+    <input type="password" [(ngModel)]="inputPassword" placeholder="ใส่ Password" class="modal-input">
 
-      <div class="modal-actions">
-        <button (click)="closePasswordModal()" class="btn-modal-cancel">ยกเลิก</button>
-        <button (click)="verifyPassword()" class="btn-modal-confirm">ตกลง</button>
-      </div>
+    <div class="modal-actions">
+      <button (click)="closePasswordModal()" class="btn-modal-cancel">ยกเลิก</button>
+      <button (click)="verifyPassword()" class="btn-modal-confirm">ตกลง</button>
     </div>
   </div>
+</div>
 }
