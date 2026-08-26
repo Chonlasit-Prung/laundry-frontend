@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Order } from '../../models/order';
@@ -16,6 +16,7 @@ export class OrderFormComponent {
   private router = inject(Router);
   private orderService = inject(OrderService);
   private cdR = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
   hasShirt = false;
   hasPant = false;
@@ -97,7 +98,7 @@ export class OrderFormComponent {
     this.isSubmitting = true;
 
     //  แสดง Loading Popup ป้องกันไม่ให้ผู้ใช้คลิกอะไรเพิ่ม
-    Swal.fire({
+Swal.fire({
       title: 'กำลังบันทึกข้อมูล...',
       text: 'กรุณารอสักครู่',
       allowOutsideClick: false,
@@ -106,9 +107,7 @@ export class OrderFormComponent {
       }
     });
 
-    // แปลงวันที่ให้อยู่ในรูปแบบ ISO String
     const isoPickupDate = new Date(this.order.pickupDate).toISOString();
-    // ดึงค่า String ของรูปภาพส่งไปตรงๆ (ไม่ตัดเป็น String เปล่า)
     const safeClothImageUrl = typeof this.order.clothImageUrl === 'string' ? this.order.clothImageUrl : '';
     const safePaymentSlipUrl = typeof this.order.paymentSlipUrl === 'string' ? this.order.paymentSlipUrl : '';
 
@@ -117,42 +116,47 @@ export class OrderFormComponent {
       shirtQty: this.hasShirt ? this.order.shirtQty : 0,
       pantQty: this.hasPant ? this.order.pantQty : 0,
       pickupDate: isoPickupDate,
-      clothImageUrl: safeClothImageUrl,       // ส่ง Base64 ไปบันทึกใน DB
-      paymentSlipUrl: safePaymentSlipUrl     // ส่ง Base64 ไปบันทึกใน DB
+      clothImageUrl: safeClothImageUrl,
+      paymentSlipUrl: safePaymentSlipUrl
     };
 
     this.orderService.createOrder(payload).subscribe({
       next: (res) => {
-        this.isSubmitting = false; // ปลดล็อก
-        Swal.close();
+        // 🔹 ใช้ NgZone ครอบเพื่อให้รันปิด Popup ใน Angular Zone ทันที
+        this.zone.run(() => {
+          this.isSubmitting = false;
+          Swal.close(); // ปิด Popup หมุน
 
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกสำเร็จ!',
-          text: `บันทึกออเดอร์เรียบร้อยแล้ว (ID: ${res.id})`,
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          this.resetForm();
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            text: `บันทึกออเดอร์เรียบร้อยแล้ว`,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            this.resetForm();
+            this.cdR.detectChanges();
+          });
         });
       },
       error: (err) => {
-        this.isSubmitting = false; // ปลดล็อก
-        console.error('Error creating order:', err);
+        this.zone.run(() => {
+          this.isSubmitting = false;
+          console.error('Error creating order:', err);
+          Swal.close();
 
-        Swal.close();
-
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาตรวจสอบข้อมูลอีกครั้ง',
-          timer: 2000,
-          showConfirmButton: false
-        });
-        this.cdR.detectChanges();
-      }
-    });
-  }
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          this.cdR.detectChanges();
+      });
+    }
+  });
+}
 
   resetForm() {
     this.hasShirt = false;
