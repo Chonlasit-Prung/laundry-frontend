@@ -15,81 +15,87 @@
       </button>
     </div>
 
-    <!-- Responsive Order Grid -->
+<!-- Responsive Order Grid -->
     <div class="order-grid">
-      @for (item of orders; track item.id || $index) {
-      <div class="order-card">
+      <!-- 🔹 เพิ่มการเช็กสถานะ isLoading -->
+      @if (isLoading) {
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #64748b;">
+          กำลังโหลดข้อมูลรายการผ้า...
+        </div>
+      } @else {
+        <!-- 🔹 ถ้าโหลดเสร็จแล้วค่อยวนลูปแสดงข้อมูล -->
+        @for (item of orders; track item.id || $index) {
+        <div class="order-card">
 
-        <!-- ข้อมูลภาพ + ชื่อผู้รับ -->
-        <div class="card-top">
-          <div class="cloth-img-box">
-            <!-- เพิ่ม onerror เพื่อให้สลับไปใช้รูปสำรองทันทีที่ URL จาก DB โหลดไม่ได้ -->
-            <img [src]="item.clothImageUrl || 'https://placehold.co/150x200?text=No+Image'"
-              onerror="this.onerror=null; this.src='https://placehold.co/150x200?text=No+Image';" alt="รูปผ้า"
-              class="cloth-img">
+          <!-- ข้อมูลภาพ + ชื่อผู้รับ -->
+          <div class="card-top">
+            <div class="cloth-img-box">
+              <img [src]="item.clothImageUrl || 'https://placehold.co/150x200?text=No+Image'"
+                onerror="this.onerror=null; this.src='https://placehold.co/150x200?text=No+Image';" alt="รูปผ้า"
+                class="cloth-img">
+            </div>
+
+            <div class="card-info">
+              <p class="info-name">{{ item.customerName }}</p>
+              @if (item.phone) { <p class="info-phone">{{ item.phone }}</p> }
+              <p class="info-label margin-top">วันนัดรับ</p>
+
+              @if (item.pickupDate) {
+              <p class="info-date">{{ item.pickupDate | date:'dd/MM/yyyy' }}</p>
+              <p class="info-day">{{ item.pickupDate | date:'EEEE' }}</p>
+              } @else {
+              <p class="info-date">-</p>
+              }
+            </div>
           </div>
 
-          <div class="card-info">
-            <p class="info-name">{{ item.customerName }}</p>
-            @if (item.phone) { <p class="info-phone">{{ item.phone }}</p> }
-            <p class="info-label margin-top">วันนัดรับ</p>
+          <div class="card-details space-y-1">
+            @if (item.shirtQty && item.shirtQty > 0) {
+            <p class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700">
+                <path
+                  d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+              </svg>
+              <span>{{ item.shirtQty }} ตัว</span>
+            </p>
+            }
 
-            @if (item.pickupDate) {
-            <p class="info-date">{{ item.pickupDate | date:'dd/MM/yyyy' }}</p>
-            <p class="info-day">{{ item.pickupDate | date:'EEEE' }}</p>
-            } @else {
-            <p class="info-date">-</p>
+            @if (item.pantQty && item.pantQty > 0) {
+            <p class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700">
+                <path d="M6 2h12v4H6z" />
+                <path d="M6 6 4 21h5l3-9 3 9h5L18 6" />
+              </svg>
+              <span>{{ item.pantQty }} ตัว</span>
+            </p>
+            }
+
+            @if (item.details) {
+            <p class="details-text">{{ item.details }}</p>
             }
           </div>
+
+          <!-- ปุ่มจัดการ -->
+          <div class="actions-group">
+            <button (click)="toggleStatus(item)" [class.status-completed]="item.status === 'completed'"
+              [class.status-pending]="item.status === 'pending'" class="status-badge btn-status">
+              {{ item.status === 'completed' ? 'เสร็จแล้ว' : 'รอดำเนินการ' }}
+            </button>
+
+            <button (click)="deleteOrder(item.id)" class="btn-delete">
+              ลบ
+            </button>
+          </div>
+
         </div>
-
-        <div class="card-details space-y-1">
-          @if (item.shirtQty && item.shirtQty > 0) {
-          <p class="flex items-center gap-1.5">
-            <!-- ไอคอนเสื้อ -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700">
-              <path
-                d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-            </svg>
-            <span>{{ item.shirtQty }} ตัว</span>
-          </p>
-          }
-
-          @if (item.pantQty && item.pantQty > 0) {
-          <p class="flex items-center gap-1.5">
-            <!-- ไอคอนกางเกง (สไตล์ Lucide) -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700">
-              <path d="M6 2h12v4H6z" />
-              <path d="M6 6 4 21h5l3-9 3 9h5L18 6" />
-            </svg>
-            <span>{{ item.pantQty }} ตัว</span>
-          </p>
-          }
-
-          @if (item.details) {
-          <p class="details-text">{{ item.details }}</p>
-          }
+        } @empty {
+        <!-- 🔹 จะแสดงผลส่วนนี้ก็ต่อเมื่อ isLoading = false แล้ว และข้อมูลใน orders เป็น array ว่างจริงๆ -->
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #64748b;">
+          ไม่พบรายการผ้าในระบบ
         </div>
-
-        <!-- ปุ่มจัดการ -->
-        <div class="actions-group">
-          <button (click)="toggleStatus(item)" [class.status-completed]="item.status === 'completed'"
-            [class.status-pending]="item.status === 'pending'" class="status-badge btn-status">
-            {{ item.status === 'completed' ? 'เสร็จแล้ว' : 'รอดำเนินการ' }}
-          </button>
-
-          <button (click)="deleteOrder(item.id)" class="btn-delete">
-            ลบ
-          </button>
-        </div>
-
-      </div>
-      } @empty {
-      <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #64748b;">
-        ไม่พบรายการผ้าในระบบ
-      </div>
+        }
       }
     </div>
 
