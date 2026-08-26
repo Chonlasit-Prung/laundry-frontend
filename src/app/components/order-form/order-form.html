@@ -95,19 +95,30 @@
 
 <!-- Modal ยืนยัน Password -->
 @if (showPasswordModal) {
-<div class="modal-overlay">
-  <div class="modal-box">
-    <div class="text-center">
-      <h3 class="modal-title">ยืนยันรหัสผ่านช่าง</h3>
-      <p class="modal-subtitle">กรอก Password เพื่อเข้าสู่หน้ารายการทั้งหมด</p>
-    </div>
+  <div class="modal-overlay">
+    <div class="modal-box">
+      <div class="text-center">
+        <h3 class="modal-title">ยืนยันรหัสผ่านช่าง</h3>
+        <p class="modal-subtitle">กรอก Password เพื่อเข้าสู่หน้ารายการทั้งหมด</p>
+      </div>
 
-    <input type="password" [(ngModel)]="inputPassword" placeholder="ใส่ Password" class="modal-input">
+      <input
+        type="password"
+        [(ngModel)]="inputPassword"
+        (keyup.enter)="verifyPassword()"
+        placeholder="ใส่ Password"
+        class="modal-input">
 
-    <div class="modal-actions">
-      <button (click)="closePasswordModal()" class="btn-modal-cancel">ยกเลิก</button>
-      <button (click)="verifyPassword()" class="btn-modal-confirm">ตกลง</button>
+      <div class="modal-actions">
+        <button (click)="closePasswordModal()" [disabled]="isVerifying" class="btn-modal-cancel">
+          ยกเลิก
+        </button>
+
+        <!-- 🔹 ล็อกปุ่มและเปลี่ยนข้อความขณะกำลังตรวจสอบ -->
+        <button (click)="verifyPassword()" [disabled]="isVerifying" class="btn-modal-confirm">
+          {{ isVerifying ? 'กำลังตรวจสอบ...' : 'ตกลง' }}
+        </button>
+      </div>
     </div>
   </div>
-</div>
 }
