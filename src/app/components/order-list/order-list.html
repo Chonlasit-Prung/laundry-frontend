@@ -17,13 +17,11 @@
 
 <!-- Responsive Order Grid -->
     <div class="order-grid">
-      <!-- 🔹 เพิ่มการเช็กสถานะ isLoading -->
       @if (isLoading) {
         <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #64748b;">
           กำลังโหลดข้อมูลรายการผ้า...
         </div>
       } @else {
-        <!-- 🔹 ถ้าโหลดเสร็จแล้วค่อยวนลูปแสดงข้อมูล -->
         @for (item of orders; track item.id || $index) {
         <div class="order-card">
 
@@ -91,9 +89,11 @@
 
         </div>
         } @empty {
-        <!-- 🔹 จะแสดงผลส่วนนี้ก็ต่อเมื่อ isLoading = false แล้ว และข้อมูลใน orders เป็น array ว่างจริงๆ -->
         <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #64748b;">
-          ไม่พบรายการผ้าในระบบ
+          <p>ไม่พบรายการผ้าในระบบ</p>
+          <button (click)="fetchOrders()" style="margin-top: 10px; padding: 8px 16px; background-color: #0d9488; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            🔄 โหลดข้อมูลใหม่อีกครั้ง
+          </button>
         </div>
         }
       }

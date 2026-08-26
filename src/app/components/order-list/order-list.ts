@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core'; // 🔹 เพิ่ม NgZone
+import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Order } from '../../models/order';
 import { DatePipe } from '@angular/common';
 import { OrderService } from '../../services/order.service';
 import Swal from 'sweetalert2';
+import { timeout, retry } from 'rxjs/operators'; // 🔹 เพิ่ม retry และ timeout
 
 @Component({
   selector: 'app-order-list',
@@ -15,10 +16,10 @@ import Swal from 'sweetalert2';
 export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
   private cdr = inject(ChangeDetectorRef);
-  private zone = inject(NgZone); // 🔹 Inject NgZone
+  private zone = inject(NgZone);
 
   orders: Order[] = [];
-  isLoading = true; // 🔹 ตัวแปรเช็กสถานะการโหลดข้อมูล
+  isLoading = true;
 
   ngOnInit(): void {
     this.fetchOrders();
@@ -26,24 +27,30 @@ export class OrderListComponent implements OnInit {
 
   fetchOrders() {
     this.isLoading = true;
+    this.cdr.detectChanges(); // แจ้งเตือน Angular ให้วาดหน้า Loading ทันที
 
-    this.orderService.getOrders().subscribe({
-      next: (data) => {
-        // 🔹 รันใน Zone เพื่อบังคับอัปเดต UI ทันทีเมื่อ API ตอบกลับ
-        this.zone.run(() => {
-          this.orders = data;
-          this.isLoading = false;
-          this.cdr.detectChanges(); // บังคับ Angular Render หน้าใหม่
-        });
-      },
-      error: (err) => {
-        this.zone.run(() => {
-          console.error('Error fetching orders:', err);
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        });
-      }
-    });
+    this.orderService.getOrders()
+      .pipe(
+        retry(2),       // 🔹 ถ้าดึงข้อมูลพลาด/ติด Timeout ให้ลองยิงซ้ำให้อัตโนมัติ 2 ครั้ง
+        timeout(15000)  // 🔹 รอสูงสุด 15 วินาที
+      )
+      .subscribe({
+        next: (data) => {
+          this.zone.run(() => {
+            this.orders = data || [];
+            this.isLoading = false;
+            this.cdr.detectChanges(); // บังคับ Angular อัปเดต UI หน้าจอทันที
+          });
+        },
+        error: (err) => {
+          this.zone.run(() => {
+            console.error('Error fetching orders:', err);
+            this.orders = [];
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        }
+      });
   }
 
   toggleStatus(order: Order) {
@@ -82,8 +89,8 @@ export class OrderListComponent implements OnInit {
     if (!id) return;
 
     Swal.fire({
-      title: 'ยืนยันการลบ?',
-      text: `คุณต้องการลบออเดอร์รหัส ${id} ใช่หรือไม่?`,
+      title: 'ยืนยันการลบ',
+      text: `คุณต้องการลบรายการนี้ ใช่หรือไม่?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
