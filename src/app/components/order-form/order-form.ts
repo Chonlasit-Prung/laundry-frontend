@@ -132,7 +132,7 @@ export class OrderFormComponent {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          this.router.navigate(['/order-list']);
+          this.resetForm();
         });
       },
       error: (err) => {
@@ -148,6 +148,26 @@ export class OrderFormComponent {
         });
       }
     });
+  }
+
+  resetForm() {
+    this.hasShirt = false;
+    this.hasPant = false;
+    this.order = {
+      customerName: '',
+      phone: '',
+      shirtQty: 1,
+      pantQty: 1,
+      details: '',
+      clothImageUrl: '',
+      pickupDate: '',
+      paymentSlipUrl: '',
+      status: 'pending'
+    };
+
+    // ล้างค่าในช่องแนบไฟล์ (ถ้ามี)
+    const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+    fileInputs.forEach(input => input.value = '');
   }
 
   openPasswordModal() { this.showPasswordModal = true; }
