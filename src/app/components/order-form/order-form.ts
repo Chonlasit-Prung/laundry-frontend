@@ -36,6 +36,7 @@ export class OrderFormComponent {
 
   showPasswordModal = false;
   inputPassword = '';
+  isVerifying = false;
 
   increaseQty(type: 'shirt' | 'pant') {
     if (type === 'shirt') this.order.shirtQty++;
@@ -182,6 +183,8 @@ Swal.fire({
   closePasswordModal() { this.showPasswordModal = false; this.inputPassword = ''; }
 
   verifyPassword() {
+    if (this.isVerifying) return;
+
     if (!this.inputPassword.trim()) {
       Swal.fire({
         icon: 'warning',
@@ -193,8 +196,13 @@ Swal.fire({
       return;
     }
 
+    this.isVerifying = true;
+
     this.orderService.verifyPassword(this.inputPassword).subscribe({
       next: (res) => {
+        this.zone.run(() => {
+          this.isVerifying = false; // ปลดล็อก
+
         if (res.success) {
           //  Alert กรณีรหัสผ่านถูกต้อง
           Swal.fire({
@@ -220,8 +228,10 @@ Swal.fire({
           this.inputPassword = '';
         }
         this.cdR.detectChanges();
+        });
       },
       error: (err) => {
+        this.zone.run(() => {
         console.error('Error verifying password:', err);
 
         // Alert กรณีเกิด Error จาก Backend / เชื่อมต่อไม่ได้
@@ -234,6 +244,7 @@ Swal.fire({
         });
         this.inputPassword = '';
         this.cdR.detectChanges();
+      });
       }
     });
   }
