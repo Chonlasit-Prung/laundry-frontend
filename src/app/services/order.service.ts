@@ -2,14 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from '../models/order';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://laundry-backend-api-ay00.onrender.com/api/Orders';
-  private authUrl = 'https://laundry-backend-api-ay00.onrender.com/api/Auth';
+
+  // ดึง Base URL จาก environment แทนการใส่ URL ตรงๆ
+  private apiUrl = `${environment.apiUrl}/api/Orders`;
+  private authUrl = `${environment.apiUrl}/api/Auth`;
+
   // 1. ดึงรายการทั้งหมด (GET)
   getOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(this.apiUrl);
@@ -30,9 +34,8 @@ export class OrderService {
     return this.http.patch(`${this.apiUrl}/${id}/status`, { status });
   }
 
-  // 3. ยืนยันรหัสผ่าน (POST JSON)
+  // 5. ยืนยันรหัสผ่าน (POST JSON)
   verifyPassword(password: string): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(`${this.authUrl}/verify-password`, { password });
   }
-
 }
